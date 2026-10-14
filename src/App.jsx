@@ -154,10 +154,16 @@ function StarModal({ day, currentRate, onClose, onConfirm }) {
     onClose();
   };
 
-  const label =
-    selected === 0
-      ? 'Không đánh giá ngày hôm nay'
-      : `Đã chọn ${selected} sao`;
+  const STAR_LABELS = {
+    0: '😤 giận',
+    1: '😠 hôm nay anh thật đáng ghét',
+    2: '😒 chưa làm em đủ wao',
+    3: '😑 nay cũng tạm mà trừ sao vì làm em gái bùn',
+    4: '🥰 có triển vọng thành bạn trai em tương lai rồi đó',
+    5: '💖 em chọn đúng người yêu',
+  };
+
+  const label = STAR_LABELS[selected];
 
   return (
     <div
@@ -212,12 +218,12 @@ function StarModal({ day, currentRate, onClose, onConfirm }) {
 
 function Legend() {
   const items = [
-    { rate: 0, desc: 'Không đánh giá' },
-    { rate: 1, desc: 'Ngày khó, cần kiên nhẫn' },
-    { rate: 2, desc: 'Thấp, chưa ổn' },
-    { rate: 3, desc: 'Trung bình, vẫn có chiều sâu' },
-    { rate: 4, desc: 'Khá ấn tượng' },
-    { rate: 5, desc: 'Rất tốt, vươn xa' },
+    { rate: 0, desc: 'giận' },
+    { rate: 1, desc: 'hôm nay anh thật đáng ghét' },
+    { rate: 2, desc: 'chưa làm em đủ wao' },
+    { rate: 3, desc: 'nay cũng tạm mà trừ sao vì làm em gái bùn' },
+    { rate: 4, desc: 'có triển vọng thành bạn trai em tương lai rồi đó' },
+    { rate: 5, desc: 'em chọn đúng người yêu' },
   ];
 
   return (
