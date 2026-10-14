@@ -231,7 +231,8 @@ function Legend() {
       {items.map((item) => (
         <div className="legend__item" key={item.rate}>
           <span className={`legend__dot dot--${item.rate}`} />
-          <span>{item.rate === 0 ? '0 sao' : `${item.rate} sao`} — {item.desc}</span>
+          <span className="legend__badge">{item.rate} sao</span>
+          <span className="legend__desc">— {item.desc}</span>
         </div>
       ))}
     </section>
