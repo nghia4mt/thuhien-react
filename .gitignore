@@ -9,7 +9,7 @@ lerna-debug.log*
 
 node_modules
 # dist is committed for Netlify deployment
-dist
+# dist
 
 dist-ssr
 *.local
