@@ -5,7 +5,8 @@
   --muted: #8A8076;
   --accent: #FF6B9D;         /* pink pastel */
   --accent-soft: #FFE3EC;
-  --star: #FFB6C1;           /* pink star */
+  --star: #F59E0B;           /* amber/gold star — better contrast */
+  --star-empty: #D1B896;     /* warm beige for unlit stars */
   --line: #E0E0E0;
   --radius: 16px;
   --maxw: 620px;
@@ -221,8 +222,14 @@ body {
   letter-spacing: 0.5px;
 }
 
-.calendar__cell .day-stars .star-filled { color: var(--star); }
-.calendar__cell .day-stars .star-empty { color: var(--muted); opacity: 0.45; }
+.calendar__cell .day-stars .star-filled {
+  color: var(--star);
+  text-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
+}
+.calendar__cell .day-stars .star-empty {
+  color: var(--star-empty);
+  opacity: 0.6;
+}
 
 .calendar__cell.rated {
   box-shadow: inset 0 0 0 2px var(--accent), 0 0 10px rgba(180, 106, 75, 0.25);
@@ -249,11 +256,11 @@ body {
 
 .legend__item { display: flex; align-items: center; gap: 6px; }
 .legend__dot { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
-.dot--1 { background: var(--star); }
-.dot--2 { background: var(--star); }
-.dot--3 { background: var(--star); }
-.dot--4 { background: var(--star); }
-.dot--5 { background: var(--star); }
+.dot--1 { background: #FCD34D; }   /* pale yellow  — 1 star */
+.dot--2 { background: #FBBF24; }   /* soft amber   — 2 stars */
+.dot--3 { background: #F59E0B; }   /* amber        — 3 stars */
+.dot--4 { background: #D97706; }   /* deep amber   — 4 stars */
+.dot--5 { background: #B45309; }   /* rich brown   — 5 stars */
 
 /* ===== Modal chọn ngôi sao ===== */
 .modal-overlay {
@@ -365,13 +372,13 @@ body {
 
 .star-btn.star-active {
   color: var(--star);
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  filter: drop-shadow(0 0 12px rgba(192, 154, 75, 0.7));
+  border-color: #D97706;
+  background: #FEF3C7;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.6));
 }
 
 .star-btn.star-empty {
-  color: var(--muted);
+  color: var(--star-empty);
 }
 
 .modal__hint {
@@ -379,6 +386,33 @@ body {
   color: var(--muted);
   font-size: 0.84rem;
   min-height: 1.2em;
+}
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.btn--secondary {
+  background: var(--paper);
+  color: var(--muted);
+  border-color: var(--line);
+}
+.btn--secondary:hover { color: var(--ink); border-color: var(--accent); }
+
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.btn--primary:hover {
+  background: #a0543a;
+  border-color: #a0543a;
 }
 
 /* ===== Mobile: responsive ===== */
