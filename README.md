@@ -1,16 +1,86 @@
-# React + Vite
+# 📅 Quá trình trưởng thành của anh
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+<div align="center">
 
-Currently, two official plugins are available:
+![App Screenshot](dist/index.html)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+</div>
 
-## React Compiler
+## Mô tả
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Ứng dụng dành cho cặp đôi, mỗi ngày 1 ngôi sao để ghi lại tiến trình trưởng thành của anh. 
+Vậy là nên như thế nào thì lệ, nên như thế nào thì đúng.
 
-## Expanding the Oxlint configuration
+## Công nghệ
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- **React** + **Vite**
+- CSS thuần (no-framework styling)
+- localStorage (dữ liệu không cần backend)
+
+## Cài đặt & Chạy thử
+
+```bash
+# 1. Clone repo
+git clone git@github.com:nghia4mt/thuhien-react.git
+cd thuhien-react
+
+# 2. Cài dependency
+npm install
+
+# 3. Chạy dev server
+npm run dev
+
+# 4. Mở trình duyệt
+# http://localhost:5173
+```
+
+## Build & Deploy (GitHub Pages)
+
+### Cấu hình GitHub Pages
+
+1. Vào **Settings** → **Pages** của repo `nghia4mt/thuhien-react`
+2. **Branch**: `main`
+3. **Folder**: `/dist`
+4. Click **Save**
+
+### Công thức base path (vite.config.js)
+
+```js
+export default defineConfig({
+  plugins: [react()],
+  base: '/thuhien-react/',
+})
+```
+
+### Build & Commit
+
+```bash
+npm run build
+git add -A
+git commit -m "build: production ready"
+git push origin main
+```
+
+→ GitHub Pages sẽ tự deploy trong 1-2 phút.
+
+## Tính năng
+
+- 📅 Xem lịch tháng, chọn ngày để đánh giá
+- ⭐ Chọn từ 0-5 sao (0 = không đánh giá)
+- 🔒 Chỉ sửa được ngày hôm nay (tương lai & quá khứ không chỉnh sửa)
+- 💾 Dữ liệu lưu lại bằng localStorage
+- 🌈 Giao diện pastel (hồng xanh da trời xanh lá)
+
+## Chỉnh sửa
+
+```bash
+# Linter
+npx oxlint src/
+
+# Build
+npm run build
+```
+
+---
+
+_Được sinh hoạt bởi Solar Mini4 + Vite + React_
