@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import './App.css';
 
 // ---------- Constants ----------
@@ -78,6 +78,7 @@ function isEditableDate(year, month, day) {
 function StarButton({ rate, active, onClick }) {
   return (
     <button
+      type="button"
       className={`star-btn ${active ? 'star-active' : 'star-empty'}`}
       data-rate={rate}
       onClick={onClick}
@@ -99,45 +100,48 @@ function Calendar({ year, month, data, onDayClick }) {
   for (let t = 0; t < trailingDays; t++) days.push(null);
 
   return (
-    <section className="calendar">
+    <section className="calendar" aria-label="Lịch đánh giá">
       <div className="calendar__weekdays" aria-hidden="true">
         {WEEKDAYS.map((w) => <span key={w}>{w}</span>)}
       </div>
       <div className="calendar__grid">
         {days.map((day, idx) => {
           if (day === null) {
-            return <div className="calendar__cell disabled" key={`empty-${idx}`} />;
+            return <div className="calendar__cell calendar__cell--empty" key={`empty-${idx}`} />;
           }
           const key = toKey(year, month, day);
           const rate = getRate(data, key);
           const today = isToday(year, month, day);
           const isRated = rate !== null;
           const isEditableDay = isEditableDate(year, month, day);
+          const CellTag = isEditableDay ? 'button' : 'div';
 
           return (
-            <div
+            <CellTag
+              type={isEditableDay ? 'button' : undefined}
               className={`calendar__cell${today ? ' today' : ''}${isRated ? ' rated' : ''}${isEditableDay ? '' : ' not-editable'}`}
               data-day={day}
               data-key={key}
-              onClick={() => { if (isEditableDay) onDayClick(key); }}
+              onClick={isEditableDay ? () => onDayClick(key) : undefined}
               key={key}
-              title={isEditableDay ? '' : `Không sửa được ngày ${formatDateLabel(key)} — chỉ sửa được ngày hôm nay`}
+              aria-label={isEditableDay ? `Đánh giá ngày ${formatDateLabel(key)}` : undefined}
+              title={isEditableDay ? 'Đánh giá hôm nay' : `Không sửa được ngày ${formatDateLabel(key)} — chỉ sửa được ngày hôm nay`}
             >
               <span className="day-num">{day}</span>
               {isRated && (
-                <div className="day-stars">
+                <div className="day-stars" aria-hidden="true">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <span
                       key={s}
                       className={`star star--${s} ${s <= rate ? 'star-filled' : 'star-empty'}`}
-                      style={{ pointerEvents: 'none', userSelect: 'none' }}
                     >
                       ★
                     </span>
                   ))}
                 </div>
               )}
-            </div>
+              {today && <span className="today-dot" aria-hidden="true" />}
+            </CellTag>
           );
         })}
       </div>
@@ -145,9 +149,17 @@ function Calendar({ year, month, data, onDayClick }) {
   );
 }
 
-// FIX: Thêm nút "Lưu" để xác nhận sau khi chọn sao
+// Nút "Lưu" để xác nhận sau khi chọn sao
 function StarModal({ day, currentRate, onClose, onConfirm }) {
   const [selected, setSelected] = useState(currentRate ?? 0);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
 
   const handleConfirm = () => {
     onConfirm(day, selected);
@@ -175,8 +187,11 @@ function StarModal({ day, currentRate, onClose, onConfirm }) {
     >
       <div className="modal">
         <div className="modal__top">
-          <h2 className="modal__title">Chọn mức trưởng thành</h2>
-          <button className="modal__close" onClick={onClose} aria-label="Đóng">
+          <div>
+            <span className="modal__badge">💗 chấm điểm ngày</span>
+            <h2 className="modal__title">Mức trưởng thành</h2>
+          </div>
+          <button type="button" className="modal__close" onClick={onClose} aria-label="Đóng">
             &times;
           </button>
         </div>
@@ -185,7 +200,8 @@ function StarModal({ day, currentRate, onClose, onConfirm }) {
           <div className="stars">
             {/* Nút 0 sao (xóa đánh giá) */}
             <button
-              className={`star-btn ${selected === 0 ? 'star-active' : 'star-empty'}`}
+              type="button"
+              className={`star-btn star-btn--zero ${selected === 0 ? 'star-active' : 'star-empty'}`}
               onClick={() => setSelected(0)}
               aria-label="0 sao"
             >
@@ -202,12 +218,11 @@ function StarModal({ day, currentRate, onClose, onConfirm }) {
           </div>
           <p className="modal__hint">{label}</p>
         </div>
-        {/* FIX: Nút xác nhận / lưu */}
         <div className="modal__footer">
-          <button className="btn btn--secondary" onClick={onClose}>
+          <button type="button" className="btn btn--secondary" onClick={onClose}>
             Huỷ
           </button>
-          <button className="btn btn--primary" onClick={handleConfirm}>
+          <button type="button" className="btn btn--primary" onClick={handleConfirm}>
             💾 Lưu
           </button>
         </div>
@@ -227,14 +242,21 @@ function Legend() {
   ];
 
   return (
-    <section className="legend">
-      {items.map((item) => (
-        <div className="legend__item" key={item.rate}>
-          <span className={`legend__dot dot--${item.rate}`} />
-          <span className="legend__badge">{item.rate} sao</span>
-          <span className="legend__desc">— {item.desc}</span>
-        </div>
-      ))}
+    <section className="legend" aria-label="Bảng chú thích số sao">
+      <div className="legend__head">
+        <span className="legend__spark" aria-hidden="true">✦</span>
+        <h2 className="legend__title">Ý nghĩa số sao</h2>
+        <span className="legend__line" aria-hidden="true" />
+      </div>
+      <div className="legend__list">
+        {items.map((item) => (
+          <div className="legend__item" key={item.rate}>
+            <span className={`legend__dot dot--${item.rate}`} aria-hidden="true" />
+            <span className="legend__badge">{item.rate} sao</span>
+            <span className="legend__desc">{item.desc}</span>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
@@ -253,18 +275,41 @@ function Stats({ data, year, month }) {
   }
 
   const avg = count > 0 ? (sum / count).toFixed(1) : '—';
+  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
 
   return (
     <>
-      <div className="stat">
-        <div className="stat__label">Tháng này</div>
-        <div className="stat__value">{count} / {total}</div>
-        <div className="stat__label">ngày đánh giá</div>
+      <div className="stat stat--days">
+        <span className="stat__icon" aria-hidden="true">🗓️</span>
+        <div className="stat__content">
+          <span className="stat__label">Tháng này</span>
+          <span className="stat__value">
+            {count}
+            <span className="stat__suffix">/{total}</span>
+          </span>
+          <span className="stat__label">ngày đánh giá</span>
+        </div>
       </div>
-      <div className="stat">
-        <div className="stat__label">Điểm trung bình</div>
-        <div className="stat__value accent">{avg}</div>
-        <div className="stat__label">sao</div>
+      <div className="stat stat--avg">
+        <span className="stat__icon" aria-hidden="true">★</span>
+        <div className="stat__content">
+          <span className="stat__label">Điểm trung bình</span>
+          <span className="stat__value">{avg}<span className="stat__suffix"> sao</span></span>
+          <span className="stat__label">cả tháng</span>
+        </div>
+      </div>
+      <div className="stat-progress">
+        <div
+          className="stat-progress__track"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+          aria-label={`Đã đánh giá ${pct}% số ngày trong tháng`}
+        >
+          <span className="stat-progress__fill" style={{ width: `${pct}%` }} />
+        </div>
+        <span className="stat-progress__text">{pct}% tháng này</span>
       </div>
     </>
   );
@@ -275,7 +320,6 @@ export default function App() {
   const [year, setYear] = useState(() => new Date().getFullYear());
   const [month, setMonth] = useState(() => new Date().getMonth());
   const [modalDay, setModalDay] = useState(null);
-  // FIX: data là state để re-render khi thay đổi
   const [data, setData] = useState(() => loadData());
 
   const goPrev = useCallback(() => {
@@ -296,13 +340,11 @@ export default function App() {
     setModalDay(key);
   }, []);
 
-  // FIX: Cập nhật state sau khi lưu để calendar re-render
   const handleStarConfirm = useCallback((key, rate) => {
     const updated = setRate(key, rate === 0 ? null : rate);
     setData({ ...updated });
   }, []);
 
-  // FIX: Cập nhật state sau khi reset để calendar re-render
   const handleReset = useCallback(() => {
     if (!window.confirm('Xoá toàn bộ dữ liệu?')) return;
     localStorage.removeItem(STORAGE_KEY);
@@ -312,39 +354,72 @@ export default function App() {
   const currentRate = modalDay ? getRate(data, modalDay) : null;
 
   return (
-    <main className="app">
-      <header className="app__header">
-        <div className="app__title-wrap">
-          <h1>Quá trình trưởng thành của anh</h1>
-          <p className="app__subtitle">Mỗi ngày 1 ngôi sao, ghi lại tiến bộ của anh 😄</p>
-        </div>
-        <div className="app__stats" id="stats" aria-live="polite">
-          <Stats data={data} year={year} month={month} />
-        </div>
-      </header>
+    <>
+      <div className="bg-decor" aria-hidden="true">
+        <span className="blob blob--pink" />
+        <span className="blob blob--sky" />
+        <span className="blob blob--green" />
+        <span className="sparkle sparkle--1">✦</span>
+        <span className="sparkle sparkle--2">✧</span>
+        <span className="sparkle sparkle--3">✦</span>
+        <span className="sparkle sparkle--4">✧</span>
+      </div>
 
-      <section className="controls">
-        <button className="btn btn--icon" aria-label="Tháng trước" onClick={goPrev}>‹</button>
-        <div className="month-label">
-          <span className="visually-hidden">{year}</span>
-          <select
-            name="month"
-            aria-label="Chọn tháng"
-            value={month}
-            onChange={(e) => setMonth(parseInt(e.target.value, 10))}
+      <main className="app">
+        <header className="app__header">
+          <span className="app__badge">💗 nhật ký của chúng mình</span>
+          <h1 className="app__title">
+            Quá trình trưởng thành <span className="app__title-tail">của anh</span>
+          </h1>
+          <p className="app__subtitle">
+            Mỗi ngày một ngôi sao, ghi lại tiến bộ của anh 😄
+          </p>
+          <div className="app__stats" id="stats" aria-live="polite">
+            <Stats data={data} year={year} month={month} />
+          </div>
+        </header>
+
+        <section className="controls" aria-label="Chọn tháng">
+          <button type="button" className="btn btn--icon" aria-label="Tháng trước" onClick={goPrev}>
+            ‹
+          </button>
+          <div className="month-label">
+            <select
+              name="month"
+              aria-label="Chọn tháng"
+              value={month}
+              onChange={(e) => setMonth(parseInt(e.target.value, 10))}
+            >
+              {MONTHS.map((i) => (
+                <option key={i} value={i}>Tháng {i + 1}</option>
+              ))}
+            </select>
+          </div>
+          <span className="year-chip">{year}</span>
+          <button type="button" className="btn btn--icon" aria-label="Tháng sau" onClick={goNext}>
+            ›
+          </button>
+          <button
+            type="button"
+            className="btn btn--icon btn--danger"
+            aria-label="Xóa dữ liệu"
+            title="Xoá toàn bộ dữ liệu"
+            onClick={handleReset}
           >
-            {MONTHS.map((i) => (
-              <option key={i} value={i}>Tháng {i + 1}</option>
-            ))}
-          </select>
-        </div>
-        <button className="btn btn--icon" aria-label="Tháng sau" onClick={goNext}>›</button>
-        <button className="btn btn--icon" aria-label="Xóa dữ liệu" onClick={handleReset}>✕</button>
-      </section>
+            ✕
+          </button>
+        </section>
 
-      <Calendar year={year} month={month} data={data} onDayClick={handleDayClick} />
+        <Calendar year={year} month={month} data={data} onDayClick={handleDayClick} />
 
-      <Legend />
+        <Legend />
+
+        <footer className="app__footer">
+          <span aria-hidden="true">🌸</span>
+          mỗi ngày một chút, rồi mình lớn lên
+          <span aria-hidden="true">🌿</span>
+        </footer>
+      </main>
 
       {modalDay && (
         <StarModal
@@ -354,6 +429,6 @@ export default function App() {
           onConfirm={handleStarConfirm}
         />
       )}
-    </main>
+    </>
   );
 }
